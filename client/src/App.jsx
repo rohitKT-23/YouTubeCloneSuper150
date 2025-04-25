@@ -1,42 +1,58 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { useEffect } from 'react';
-import Home from './pages/Home';
-import Login from './pages/Login';
-import Register from './pages/Register';
-import VideoPage from './pages/VideoPage';
+import { useState, useEffect } from 'react';
+import { Routes, Route, useLocation } from 'react-router-dom';
 import Header from './components/Header';
-import { AuthProvider } from './context/AuthContext';
-import SearchPage from './pages/SearchPage';
-import NotFoundPage from './pages/NotFoundPage';
+import Sidebar from './components/Sidebar';
+import Home from './pages/Home';
+import VideoPage from './pages/VideoPage';
+import SearchResults from './pages/SearchResults';
+import Auth from './pages/Auth';
+import NotFound from './pages/NotFound';
+import ProtectedRoute from './components/ProtectedRoute';
+import { useAuth } from './context/AuthContext';
+import { Link } from 'react-router-dom';
 
-const App = () => {
-  // Update title
+function App() {
+  const [showSidebar, setShowSidebar] = useState(true);
+  const location = useLocation();
+  const { loading } = useAuth();
+  
   useEffect(() => {
-    document.title = 'YouTube Clone';
-  }, []);
+    // Close sidebar on mobile when navigating
+    if (window.innerWidth < 768) {
+      setShowSidebar(false);
+    }
+  }, [location.pathname]);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="w-8 h-8 border-4 border-red-600 border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    );
+  }
 
   return (
-    <AuthProvider>
-      <Router>
-        <div className="min-h-screen bg-white dark:bg-gray-900 text-gray-900 dark:text-white transition-colors">
-          <Header />
-          <div className="pt-16"> {/* Adjust for fixed header */}
-            <Routes>
-              <Route path="/" element={<Home />} />
-              <Route path="/login" element={<Login />} />
-              <Route path="/register" element={<Register />} />
-              <Route path="/video/:videoId" element={<VideoPage />} />
-              <Route path="/search" element={<SearchPage />} />
-              <Route path="/trending" element={<Home />} /> {/* Placeholder */}
-              <Route path="/subscriptions" element={<Home />} /> {/* Placeholder */}
-              <Route path="/library" element={<Home />} /> {/* Placeholder */}
-              <Route path="*" element={<NotFoundPage />} />
-            </Routes>
-          </div>
-        </div>
-      </Router>
-    </AuthProvider>
+    <div className="flex flex-col h-screen">
+      <Header toggleSidebar={() => setShowSidebar(!showSidebar)} />
+      <div className="flex flex-1 overflow-hidden">
+        {showSidebar && <Sidebar />}
+        <main className={`flex-1 overflow-y-auto pt-16 ${showSidebar ? 'ml-0 md:ml-64' : 'ml-0'}`}>
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/video/:videoId" element={<VideoPage />} />
+            <Route path="/search" element={<SearchResults />} />
+            <Route path="/auth" element={<Auth />} />
+            <Route path="/add-comment" element={
+              <ProtectedRoute>
+                <VideoPage />
+              </ProtectedRoute>
+            } />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </main>
+      </div>
+    </div>
   );
-};
+}
 
 export default App;
