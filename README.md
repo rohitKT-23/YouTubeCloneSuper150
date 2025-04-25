@@ -1,6 +1,6 @@
 ﻿# YouTubeCloneSuper150
  Here is a video demonstrating the functionality of my project:
-[Watch the video](https://github.com/rohitKT-23/YouTubeCloneSuper150/blob/main/YTClone.mkv?raw=true)
+![Video](https://github.com/rohitKT-23/YouTubeCloneSuper150/blob/main/YTClone.mkv?raw=true)
 # YouTube Clone (MERN Stack)
 
 A full-stack YouTube clone built with MongoDB, Express, React, and Node.js (MERN stack) with Tailwind CSS for styling.
