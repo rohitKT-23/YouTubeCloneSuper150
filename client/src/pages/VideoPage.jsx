@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import axios from 'axios';
 import VideoPlayer from '../components/VideoPlayer';
 import Comments from '../components/Comments';
 import VideoCard from '../components/VideoCard';
 import { ThumbsUp, ThumbsDown, Share, Save, Flag } from 'lucide-react';
+import axios from 'axios';
 
 const VideoPage = () => {
   const { videoId } = useParams();
@@ -19,17 +19,18 @@ const VideoPage = () => {
     const fetchData = async () => {
       setLoading(true);
       try {
-        // Fetch video details
+        // Fetch video data from backend
         const videoRes = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/videos/${videoId}`);
         setVideo(videoRes.data);
-        
-        // Fetch comments
+
+        // Fetch comments for the video
         const commentsRes = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/videos/${videoId}/comments`);
         setComments(commentsRes.data);
-        
+
         // Fetch related videos
-        const relatedRes = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/videos/related/${videoId}`);
-        setRelatedVideos(relatedRes.data);
+        const relatedVideosRes = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/videos/related`);
+        setRelatedVideos(relatedVideosRes.data);
+        
       } catch (error) {
         console.error('Error fetching video data:', error);
       } finally {
@@ -127,32 +128,21 @@ const VideoPage = () => {
           />
           <div>
             <h3 className="font-medium">{video.uploader}</h3>
-            <p className="text-sm text-gray-600">{video.subscriberCount || '1M'} subscribers</p>
-            <p className="text-sm mt-2">{video.description || 'No description available.'}</p>
+            <p className="text-sm text-gray-600">Subscribers: {video.subscriberCount}</p>
           </div>
-          <button className="ml-auto bg-red-600 text-white px-4 py-2 rounded-full hover:bg-red-700 transition-colors">
-            Subscribe
-          </button>
         </div>
         
-        {/* Comments */}
-        <Comments videoId={videoId} comments={comments} setComments={setComments} />
+        {/* Comments Section */}
+        <Comments comments={comments} />
+        
       </div>
-      
+
       {/* Related Videos */}
       <div className="lg:w-1/4">
-        <h3 className="font-bold mb-4">Related Videos</h3>
-        <div className="flex flex-col gap-4">
-          {relatedVideos.length > 0 ? (
-            relatedVideos.map(video => (
-              <div key={video.videoId} className="flex-shrink-0 w-full">
-                <VideoCard video={video} />
-              </div>
-            ))
-          ) : (
-            <p className="text-gray-500">No related videos found.</p>
-          )}
-        </div>
+        <h3 className="font-medium text-xl mb-4">Related Videos</h3>
+        {relatedVideos.map((relatedVideo) => (
+          <VideoCard key={relatedVideo.videoId} video={relatedVideo} />
+        ))}
       </div>
     </div>
   );
